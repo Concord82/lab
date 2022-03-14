@@ -4,6 +4,8 @@ DATA SEGMENT
     message2 db 'input B= $'
     otvet    db 'c= $'
     endline  db 13,10,'$'
+    bufer    db '    $'
+
 DATA ENDS
 STK SEGMENT STACK
     db 256 dup('?')
@@ -13,18 +15,48 @@ ASSUME CS:CODE,DS:DATA,SS:STK
 ProgramStart      PROC  NEAR
     mov ax, DATA            ; 
     mov ds,ax               ;
+
+    mov di, OFFSET bufer
+
     mov bx, 0DFh
     call OutString
     
     mov bx,OFFSET message1
-    call PrintString
-    call OutString
+    call PrintString        ; получить значение А от пользователя
+    push bx                 ; сохраняем значение перемнной А в стеке
+
     mov bx,OFFSET message2
-    call PrintString
+    call PrintString        ; получить значение B от пользователя
+
+    mov ax, bx 
+    mov cx, 2               ; отложим 2 в cx под умножение
+
+    sbb ax, 5h              ; b - 5H
+    jnc M4                  ;нет переноса?
+    ; --------------------------------------------------------
+    ; выполнить если B < 4 и результат вычитания отрицательный
+    ; --------------------------------------------------------
+    neg ax                  ;в al модуль результата так как результат отрицательный
+
+    
+    mul cx                  ; умножаем на два регистр AX
+
+
+
+
+
+    jmp M6
+M4: ; --------------------------------------------------------
+    ; выполнить если B >= 5 и результат вычитания положительный
+    ; --------------------------------------------------------
+    mul cx                  ; умножаем на два регистр AX
+
+
+M6:
+    mov bx, ax
     call OutString
 
-
-
+  
 
     mov ax,4c00h    ; функция DOS завершения программы
     int 21h         ; завершить программу
