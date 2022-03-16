@@ -13,13 +13,9 @@ STK ENDS
 CODE SEGMENT
 ASSUME CS:CODE,DS:DATA,SS:STK
 ProgramStart      PROC  NEAR
-    mov ax, DATA            ; 
-    mov ds,ax               ;
-
+    mov ax, DATA             
+    mov ds,ax               
     mov di, OFFSET bufer
-
-    mov bx, 0DFh
-    call OutString
     
     mov bx,OFFSET message1
     call PrintString        ; получить значение А от пользователя
@@ -28,7 +24,12 @@ ProgramStart      PROC  NEAR
     mov bx,OFFSET message2
     call PrintString        ; получить значение B от пользователя
 
-    mov ax, bx 
+    mov ax, bx              ; переносим введенное значение ax = B
+    pop bx                  ; восстанавливаем из стека     bx = A
+    push bx                 ; копируем  A в стек 
+    push ax                 ; копируем  B в стек 
+    push bx                 ; копируем  A в стек 
+
     mov cx, 2               ; отложим 2 в cx под умножение
 
     sbb ax, 5h              ; b - 5H
@@ -43,7 +44,6 @@ ProgramStart      PROC  NEAR
     pop bx                  ; востановить А в bx из стека
     sbb ax,bx               ; так как у нас произведение отрицательное
                             ; выполняем вычитание из А
-
     jmp M6
 M4: ; --------------------------------------------------------
     ; выполнить если B >= 5 и результат вычитания положительный
@@ -57,16 +57,16 @@ M6:
     jnc M7                  ; если результат не отрицательный переход
     neg ax                  ; иначе вычисляем модуль числа
 M7:
-    ;# тестовый кусок для вывода результата вычисления
-    ; далее будет получение значения 4го ррегистра и вывод A или B
-    mov bx, ax
-    call OutString
-
-  
+    ;   результат расчетов в регистре ax
+    pop bx                  ; из стека берем B и заносим в bx
+    test ax, 00010000b      ; проверяем четвертый бит результата
+    jz nobit                ; если бит не задан переход на метку
+    pop bx                  ; если бит установлен извлечь из стека А
+nobit:
+    call OutString          ; вывод пользователь содержимого bx
 
     mov ax,4c00h    ; функция DOS завершения программы
     int 21h         ; завершить программу
-
 ProgramStart   ENDP
 
 ; Подпрограмма вывода строки
@@ -94,7 +94,6 @@ M1: mov cl, 4h      ;пересылка 4h в регистр cl
 M2: add dl,al       ;сложение: (dl)=(dl)+(al)
 
     mov bl, dl
-
     call print_endline
     ret
 PrintString ENDP
@@ -115,7 +114,6 @@ M3: mov dl, 30h     ; место под результат,
     mov ah,2h       ; номер функции вывода символа
     int 21h
 loop M3         ; если cx<>0 то cx=cx-1 и переход на метку m1
-   
     call print_endline
     ret
 OutString ENDP
