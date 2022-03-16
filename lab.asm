@@ -2,10 +2,7 @@
 DATA SEGMENT
     message1 db 'input A= $'
     message2 db 'input B= $'
-    otvet    db 'c= $'
     endline  db 13,10,'$'
-    bufer    db '    $'
-
 DATA ENDS
 STK SEGMENT STACK
     db 256 dup('?')
@@ -15,7 +12,6 @@ ASSUME CS:CODE,DS:DATA,SS:STK
 ProgramStart      PROC  NEAR
     mov ax, DATA             
     mov ds,ax               
-    mov di, OFFSET bufer
     
     mov bx,OFFSET message1
     call PrintString        ; получить значение А от пользователя
