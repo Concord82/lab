@@ -1,5 +1,10 @@
 *.EXE
 *.MAP
 *.OBJ
-!temp/bin
-temp/**
+
+
+
+!/temp
+/temp/*
+!/temp/bin
+
